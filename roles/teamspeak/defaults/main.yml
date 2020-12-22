@@ -1,0 +1,5 @@
+teamspeak_image: teamspeak
+teamspeak_dbpassword: changeme
+teamspeak_port_voice: 9987
+teamspeak_port_query: 10011
+teamspeak_port_file: 30033

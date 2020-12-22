@@ -1,0 +1,8 @@
+---
+- name: setup race servers
+  hosts: race
+  remote_user: root
+
+  roles:
+    - teamspeak
+    - acc_server

@@ -1,0 +1,10 @@
+acc_image: kugel/accweb:latest 
+acc_admin_password: changeme
+acc_mod_password: changeme
+acc_ro_password: changeme
+acc_port_web: 8080
+acc_port_race: 9001
+acc_cert_path: /srv/acccerts/
+acc_server_path: /srv/accserver/
+acc_letsencrypt_fqdn: race.example.com
+acc_letsencrypt_email: foo@exmaple.com

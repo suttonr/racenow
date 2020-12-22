@@ -1,0 +1,21 @@
+---
+- name: teamspeak | db | Run teamspeak database container
+  docker_container:
+    name: teamspeak-db
+    image: mariadb
+    state: started
+    env:
+      MYSQL_ROOT_PASSWORD: "{{ teamspeak_dbpassword }}"
+      MYSQL_DATABASE: teamspeak
+  register: db_cont_metadata
+
+- name: teamspeak | db | Wait for db to accept connections
+  wait_for:
+    host: '{{ db_cont_metadata["ansible_facts"]["docker_container"]["NetworkSettings"]["IPAddress"] }}'
+    port: 3306
+    state: drained
+    connect_timeout: 1
+    timeout: 30
+  register: db_running
+  until: db_running is success
+  retries: 10

@@ -1,0 +1,40 @@
+---
+- name: acc_server | setup | Install packages 
+  apt:
+    name: 
+      - docker.io
+      - certbot
+    cache_valid_time: 600
+    state: present
+
+- name: acc_server  | setup | Install docker-py 
+  pip:
+    name: "docker-py"
+
+- name: acc_server | setup | create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  with_items:
+    - "{{ acc_cert_path }}"
+    - "{{ acc_server_path }}"
+
+- name: acc_server | setup | copy directories
+  copy:
+    src: accserver/accServer.exe
+    dest: "{{ acc_server_path }}"
+
+- name: acc_server | setup | Check if cert exists
+  stat:
+    path: /srv/acccerts/cert.pem
+  register: stat_result
+
+- name: acc_server | setup | get cert
+  shell: |
+    certbot certonly --standalone -n --agree-tos -m {{ acc_letsencrypt_email }} -d {{ acc_letsencrypt_fqdn }}
+    cp /etc/letsencrypt/live/{{ acc_letsencrypt_fqdn }}/fullchain.pem /srv/acccerts/cert.pem
+    cp /etc/letsencrypt/live/{{ acc_letsencrypt_fqdn }}/privkey.pem /srv/acccerts/key.pem
+  when: 
+    - acc_letsencrypt_fqdn != "race.example.com"
+    - not stat_result.stat.exists

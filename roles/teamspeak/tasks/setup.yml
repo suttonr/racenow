@@ -1,0 +1,14 @@
+---
+- name: teamspeak | setup | Install packages 
+  apt:
+    name:
+      - docker.io
+      - certbot
+      - python3-pip
+      - python3-docker
+    cache_valid_time: 600
+    state: present
+
+- name: teamspeak | setup | Install docker-py 
+  pip:
+    name: "docker-py"

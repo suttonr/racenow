@@ -1,0 +1,43 @@
+---
+- name: teamspeak | app | Run teamspeak container
+  docker_container:
+    name: teamspeak-app
+    image: "{{ teamspeak_image }}"
+    state: started
+    ports:
+      - "{{ teamspeak_port_voice }}:9987/udp"
+      - "{{ teamspeak_port_query }}:10011"
+      - "{{ teamspeak_port_file }}:30033"    
+    env:
+      TS3SERVER_DB_PLUGIN: "ts3db_mariadb"
+      TS3SERVER_DB_SQLCREATEPATH: "create_mariadb"
+      TS3SERVER_DB_HOST: '{{ db_cont_metadata["ansible_facts"]["docker_container"]["NetworkSettings"]["IPAddress"] }}'
+      TS3SERVER_DB_USER: "root"
+      TS3SERVER_DB_PASSWORD: "{{ teamspeak_dbpassword }}"
+      TS3SERVER_DB_NAME: "teamspeak"
+      TS3SERVER_DB_WAITUNTILREADY: "30"
+      TS3SERVER_LICENSE: "accept"
+      TS3SERVER_LOG_QUERY_COMMANDS: "1"
+  register: ts_cont_metadata
+
+- name: teamspeak | app | Wait for app to accept connections
+  wait_for:
+    host: '{{ ts_cont_metadata["ansible_facts"]["docker_container"]["NetworkSettings"]["IPAddress"] }}'
+    port: 10011
+    state: drained
+    connect_timeout: 1
+    timeout: 30
+  register: app_running
+  until: app_running is success
+  retries: 10
+
+- name: teamspeak | app | wait for token to be ready
+  pause:
+    seconds: 15
+- name: teamspeak | app | get admin token
+  shell: 'docker logs teamspeak-app 2>/dev/null | sed -nr "s/.*(token=.*)/\1/p"'
+  register: token
+
+- name: teamspeak | app | output token
+  debug:
+    msg: "{{token.stdout}}"

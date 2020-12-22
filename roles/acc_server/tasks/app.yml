@@ -1,0 +1,35 @@
+---
+- name: acc_server | app | Run accserver container
+  docker_container:
+    name: acc-app
+    image: "{{ acc_image }}"
+    state: started
+    ports:
+      - "{{ acc_port_web }}:8080"
+      - "{{ acc_port_race }}:9001/tcp"
+      - "{{ acc_port_race }}:9001/udp"
+    env:
+      ACCWEB_HOST: 0.0.0.0:8080
+      ACCWEB_ENABLE_TLS: "true"
+      ACCWEB_CERT_FILE: /sslcerts/cert.pem
+      ACCWEB_PRIV_FILE: /sslcerts/key.pem
+      ACCWEB_ADMIN_PASSWORD: "{{ acc_admin_password }}"
+      ACCWEB_MOD_PASSWORD: "{{ acc_mod_password }}"
+      ACCWEB_RO_PASSWORD: "{{ acc_ro_password }}"
+      ACCWEB_LOGLEVEL: info
+      ACCWEB_CORS: "*"
+    volumes:
+      - "{{ acc_cert_path }}:/sslcerts"
+      - "{{ acc_server_path }}:/accserver"
+  register: acc_cont_metadata
+
+- name: acc_server | app | Wait for db to accept connections
+  wait_for:
+    host: '{{ acc_cont_metadata["ansible_facts"]["docker_container"]["NetworkSettings"]["IPAddress"] }}'
+    port: 9987
+    state: drained
+    connect_timeout: 1
+    timeout: 30
+  register: app_running
+  until: app_running is success
+  retries: 10

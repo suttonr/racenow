@@ -1,0 +1,6 @@
+.terraform*
+*.tfstate
+*.tfstate.backup
+*.auto.tfvars
+roles/acc_server/files/accserver/accServer.exe
+inventory
