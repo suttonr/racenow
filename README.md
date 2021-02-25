@@ -1,9 +1,10 @@
-# go-racing
+# racenow
 Terraform and Ansible to provision a race server to Digital Ocean.  Currently
 sets up ACC and Teamspeak servers.  Potentially other servers can be added as 
 roles rather simply.
 
 # Terraform Input Variables
+Some variables you may/should override from their defaults.
 ## API Key
 `TF_VAR_do_token`
 
